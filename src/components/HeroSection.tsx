@@ -8,7 +8,7 @@ export default function HeroSection() {
   const { lang, t } = useLanguage();
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-zinc-950 px-4 sm:px-6 py-24 sm:py-32">
+    <section className="relative min-h-auto flex flex-col items-center justify-center overflow-hidden bg-zinc-950 px-4 sm:px-6 py-8 sm:py-24 md:py-32">
       {/* Background Radial & Gradient Overlays */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-950/40 via-zinc-950 to-zinc-950 pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
@@ -22,23 +22,23 @@ export default function HeroSection() {
       </div>
 
       {/* Hero Content */}
-      <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8 animate-fade-in-up">
+      <div className="relative z-10 max-w-4xl mx-auto text-center space-y-4 sm:space-y-8 animate-fade-in-up">
         {/* Live Pill Badge */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-red-950/60 border border-red-700/60 text-red-400 text-xs font-bold tracking-wider uppercase shadow-lg glow-red">
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-red-950/60 border border-red-700/60 text-red-400 text-[11px] sm:text-xs font-bold tracking-wider uppercase shadow-lg glow-red">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse-dot" />
           <span>{t.heroBadge}</span>
         </div>
 
         {/* H1 Heading with Glowing Red Accent */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.08]">
+        <h1 className="text-2xl sm:text-5xl md:text-7xl font-black tracking-tight text-white leading-tight">
           {t.heroHeading1}{" "}
           <span className="text-red-500 text-glow-red">{t.heroHeadingAccent}</span>
-          <br />
+          <br className="hidden sm:inline" />{" "}
           {t.heroHeading2}
         </h1>
 
         {/* Subtitle */}
-        <p className="text-zinc-400 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed">
+        <p className="text-zinc-400 text-xs sm:text-lg max-w-2xl mx-auto leading-relaxed line-clamp-2 sm:line-clamp-none">
           {t.heroSubtext}
         </p>
 

@@ -19,6 +19,7 @@ export default function DirectorySection() {
   const [sortBy, setSortBy] = useState<"recommended" | "nearest" | "priceAsc" | "priceDesc">("recommended");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"split" | "grid">("split");
+  const [mobileMapToggle, setMobileMapToggle] = useState<"list" | "map">("list");
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [activeRestaurant, setActiveRestaurant] = useState<Restaurant | null>(null);
   const [mapSelectedRestaurant, setMapSelectedRestaurant] = useState<Restaurant | null>(null);
@@ -261,10 +262,38 @@ export default function DirectorySection() {
            Left: Horizontal cards with image collage + Japanese taglines
            Right: Interactive live map with pins
            ════════════════════════════════════════════════════════════════════ */
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* Left Column: Horizontal Restaurant Cards */}
-          <div className="lg:col-span-7 xl:col-span-7 space-y-4">
+        <div>
+          {/* Mobile-Only List vs Map Toggle Pill Bar */}
+          <div className="flex sm:hidden w-full rounded-2xl bg-zinc-900 border border-white/10 p-1 text-xs mb-4">
+            <button
+              type="button"
+              onClick={() => setMobileMapToggle("list")}
+              className={`flex-1 py-2 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-1.5 ${
+                mobileMapToggle === "list"
+                  ? "bg-red-600 text-white shadow glow-red"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              <span>📋</span>
+              <span>{lang === "ja" ? `一覧 (${filteredRestaurants.length})` : `List (${filteredRestaurants.length})`}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileMapToggle("map")}
+              className={`flex-1 py-2 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-1.5 ${
+                mobileMapToggle === "map"
+                  ? "bg-red-600 text-white shadow glow-red"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              <span>🗺️</span>
+              <span>{lang === "ja" ? "インタラクティブ地図" : "Live Map"}</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column: Horizontal Restaurant Cards */}
+            <div className={`lg:col-span-7 xl:col-span-7 space-y-4 ${mobileMapToggle === "map" ? "hidden lg:block" : "block"}`}>
             {filteredRestaurants.map((shop) => {
               const bookmarked = isBookmarked(shop.id);
               const isMapSelected = mapSelectedRestaurant?.id === shop.id;
@@ -407,18 +436,19 @@ export default function DirectorySection() {
             })}
           </div>
 
-          {/* Right Column: Sticky Interactive Live Map */}
-          <div className="lg:col-span-5 xl:col-span-5 sticky top-20">
-            <InteractiveDiningMap
-              restaurants={filteredRestaurants}
-              selectedRestaurant={mapSelectedRestaurant}
-              onSelectRestaurant={(shop) => {
-                setMapSelectedRestaurant(shop);
-              }}
-              onBookRestaurant={(shop) => {
-                setActiveRestaurant(shop);
-              }}
-            />
+            {/* Right Column: Sticky Interactive Live Map */}
+            <div className={`lg:col-span-5 xl:col-span-5 sticky top-20 ${mobileMapToggle === "list" ? "hidden lg:block" : "block"}`}>
+              <InteractiveDiningMap
+                restaurants={filteredRestaurants}
+                selectedRestaurant={mapSelectedRestaurant}
+                onSelectRestaurant={(shop) => {
+                  setMapSelectedRestaurant(shop);
+                }}
+                onBookRestaurant={(shop) => {
+                  setActiveRestaurant(shop);
+                }}
+              />
+            </div>
           </div>
         </div>
       ) : (

@@ -79,11 +79,11 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Food Filter Button Icon */}
+        {/* Food Filter Button Icon (Shown on desktop; on mobile users use cuisine circles & bottom nav) */}
         <button
           type="button"
           onClick={() => setFoodModalOpen(true)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+          className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
             selectedFoodType !== "all"
               ? "bg-red-950/80 border border-red-500 text-red-300 glow-red"
               : "bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-300"
@@ -91,7 +91,7 @@ export default function Navbar() {
           title={lang === "ja" ? "料理ジャンルで絞り込み" : "Filter Cuisine"}
         >
           <span className="text-sm">🍜</span>
-          <span className="hidden sm:inline">
+          <span>
             {selectedFoodType === "all"
               ? lang === "ja" ? "料理絞り込み" : "Food Filter"
               : selectedFoodType.toUpperCase()}
@@ -189,17 +189,9 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Hamburger & Language */}
+        {/* Mobile Language Switcher */}
         <div className="flex sm:hidden items-center gap-1.5">
           <LanguageSwitcher />
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((v) => !v)}
-            className="p-1.5 rounded-xl bg-zinc-900 border border-white/10 text-white text-sm"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? "✕" : "☰"}
-          </button>
         </div>
       </div>
 

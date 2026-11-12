@@ -11,15 +11,19 @@ export default function MobileNav() {
   const pathname = usePathname();
   const { lang } = useLanguage();
   const { bookmarks, isAuthenticated } = useAuth();
-  const { setFoodModalOpen } = useFilter();
+  const { setFoodModalOpen, setSelectedFoodType } = useFilter();
 
   return (
     <nav className="fixed bottom-3 left-3 right-3 z-40 sm:hidden">
-      <div className="mx-auto max-w-md rounded-full bg-zinc-950/90 backdrop-blur-2xl border border-white/15 px-3 py-2 shadow-2xl glass-panel">
+      <div className="mx-auto max-w-md rounded-full bg-zinc-950/95 backdrop-blur-2xl border border-white/15 px-3 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.8)] glass-panel">
         <div className="flex items-center justify-around">
           {/* Home */}
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedFoodType("all");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
             className="flex flex-col items-center gap-0.5 group py-1 px-2"
           >
             <span className="text-base transition-transform group-active:scale-90">🏠</span>
@@ -30,7 +34,7 @@ export default function MobileNav() {
             >
               {lang === "ja" ? "ホーム" : "Home"}
             </span>
-          </Link>
+          </button>
 
           {/* Browse */}
           <Link
