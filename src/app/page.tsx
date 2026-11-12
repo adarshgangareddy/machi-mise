@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import CategoriesSection from "@/components/CategoriesSection";
 import DirectorySection from "@/components/DirectorySection";
+import CommunityShareAndPlatforms from "@/components/CommunityShareAndPlatforms";
 import BusinessCtaBanner from "@/components/BusinessCtaBanner";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -44,6 +45,9 @@ export default function HomePage() {
 
       {/* 4. Interactive Live Search, Filter & Real Japanese Restaurant Directory */}
       <DirectorySection />
+
+      {/* 4.5. MultiMovies-style Community Share Count & Available Across Japan Badges */}
+      <CommunityShareAndPlatforms />
 
       {/* 5. Business Registration CTA Banner */}
       <BusinessCtaBanner />

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Restaurant, BookingOption } from "@/data/restaurants";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -166,6 +167,14 @@ export default function RestaurantDetailModal({
                 <span>{copied ? "✓" : "📋"}</span>
                 <span>{copied ? t.modalCopied : t.modalCopyAddress}</span>
               </button>
+
+              <Link
+                href={`/shop/${restaurant.id}`}
+                className="flex items-center gap-1.5 px-4 py-3 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-white border border-white/20 text-xs font-bold backdrop-blur-md transition-colors shadow-lg"
+              >
+                <span>{lang === "ja" ? "詳細ページへ" : "Full Dashboard"}</span>
+                <span>↗</span>
+              </Link>
             </div>
           </div>
         </div>

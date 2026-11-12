@@ -80,6 +80,14 @@ export const CATEGORIES = [
   { id: "yakiniku", label: "Yakiniku & Wagyu", ja: "焼肉・和牛", emoji: "🥩" },
 ];
 
+export const CITIES = [
+  { id: "all", label: "All Cities", ja: "全国" },
+  { id: "tokyo", label: "Tokyo", ja: "東京" },
+  { id: "osaka", label: "Osaka", ja: "大阪" },
+  { id: "kyoto", label: "Kyoto", ja: "京都" },
+  { id: "fukuoka", label: "Fukuoka", ja: "福岡" },
+];
+
 export const REAL_RESTAURANTS: Restaurant[] = [
   // ══════════════════════════════════════════════════════════════════════════
   // TOKYO (東京都) — MINIMUM 12 VERIFIED REAL FAMOUS SHOPS

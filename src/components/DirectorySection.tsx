@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { REAL_RESTAURANTS, CATEGORIES, Restaurant } from "@/data/restaurants";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -328,13 +329,24 @@ export default function DirectorySection() {
                     </div>
 
                     <div className="flex justify-between items-center pt-1 text-[10px] sm:text-xs">
-                      <span className="text-red-400 font-extrabold group-hover:underline flex items-center gap-0.5">
+                      <Link
+                        href={`/shop/${shop.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-red-400 hover:text-red-300 font-extrabold flex items-center gap-0.5 hover:underline"
+                      >
                         <span>{lang === "ja" ? "予約・詳細" : "Book / Menu"}</span>
                         <span>→</span>
-                      </span>
-                      <span className="text-[9px] text-zinc-500">
-                        {shop.reviewsCount} reviews
-                      </span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveRestaurant(shop);
+                        }}
+                        className="text-[9px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80 border border-white/5"
+                      >
+                        {lang === "ja" ? "簡易表示" : "Quick View"}
+                      </button>
                     </div>
                   </div>
                 </div>
