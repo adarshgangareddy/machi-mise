@@ -71,3 +71,4 @@ export default function ThemeSwitcher({ variant = "pill" }: ThemeSwitcherProps) 
     </button>
   );
 }
+
