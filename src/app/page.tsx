@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
 import MobileStickyCtA from "@/components/MobileStickyCtA";
 import MobileNav from "@/components/MobileNav";
+import FoodFilterModal from "@/components/FoodFilterModal";
+import RequireLoginModal from "@/components/RequireLoginModal";
 
 export const metadata: Metadata = {
   title: "まちの店 — Discover Authentic Japanese Restaurants & Local Gems",
@@ -57,6 +59,10 @@ export default function HomePage() {
 
       {/* 9. Floating Mobile Bottom Navigation Bar (Streaming/MultiMovies style) */}
       <MobileNav />
+
+      {/* 10. Modals: Food Cuisine Filter & Require Login Prompt */}
+      <FoodFilterModal />
+      <RequireLoginModal />
     </div>
   );
 }

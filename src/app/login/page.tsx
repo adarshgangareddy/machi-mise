@@ -274,6 +274,34 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/* Quick Demo Sign-in Banner for Testing */}
+              <div className="p-3.5 rounded-2xl bg-zinc-800/80 border border-white/10 space-y-2 mb-4">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <span>⚡</span>
+                    <span>{lang === "ja" ? "テスト用お試しログイン" : "Instant Demo Testing Login"}</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
+                    Free / 即時
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-tight">
+                  {lang === "ja"
+                    ? "会員限定機能（全店舗閲覧・予約・決済）をワンクリックでお試しいただけます。"
+                    : "Test all member features (viewing all shops, reservations, payments) in 1-click."}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    login("+81 90-1234-5678", "demo@machi-mise.jp");
+                    router.push("/");
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black text-xs shadow glow-red transition-all"
+                >
+                  {lang === "ja" ? "ワンクリックでお試しログイン →" : "1-Click Demo Sign In →"}
+                </button>
+              </div>
+
               {/* STEP: phone */}
               {step === 'phone' && (
             <form onSubmit={handleSendOtp} className="space-y-4" noValidate>
@@ -356,6 +384,12 @@ export default function LoginPage() {
           {/* STEP: otp */}
           {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} className="space-y-5" noValidate>
+              <div className="p-2.5 rounded-xl bg-zinc-800/80 border border-white/10 text-center">
+                <span className="text-[11px] text-zinc-400">
+                  {lang === "ja" ? "テスト用認証コード: " : "Test Verification Code: "}
+                  <strong className="text-white font-mono bg-zinc-950 px-2 py-0.5 rounded border border-white/10">123456</strong>
+                </span>
+              </div>
               <OtpInput value={otp} onChange={v => { setOtp(v); setOtpError(null) }} hasError={!!otpError} />
 
               {otpError && (
