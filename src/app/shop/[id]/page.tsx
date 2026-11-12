@@ -50,3 +50,4 @@ export default async function ShopPage({
 
   return <ShopDashboardView restaurant={restaurant} />;
 }
+
