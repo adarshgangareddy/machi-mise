@@ -695,3 +695,4 @@ export const REAL_RESTAURANTS: Restaurant[] = [
     googleMapsUrl: "https://maps.google.com/?q=HARBS+Roppongi+Hills+Tokyo",
   },
 ];
+

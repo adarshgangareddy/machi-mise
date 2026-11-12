@@ -37,3 +37,4 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
     </div>
   );
 }
+
