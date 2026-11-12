@@ -1,177 +1,252 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useRef, useState, useEffect, useTransition } from 'react'
 
-// ── OTP Input ─────────────────────────────────────────────────────────────────
+type Step = 'phone' | 'otp'
+type FieldError = string | null
 
-function OtpInput({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-}) {
-  const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = value.padEnd(6, " ").split("").slice(0, 6);
+// ─── Rate limit helpers ───────────────────────────────────────────────────────
+
+function getRateLimitData(): { count: number; firstAttempt: number } {
+  if (typeof window === 'undefined') return { count: 0, firstAttempt: 0 }
+  try {
+    const raw = localStorage.getItem('otp-rate-limit')
+    return raw ? JSON.parse(raw) : { count: 0, firstAttempt: 0 }
+  } catch { return { count: 0, firstAttempt: 0 } }
+}
+
+function incrementRateLimit() {
+  const data = getRateLimitData()
+  const now = Date.now()
+  const windowMs = 60_000
+  if (now - data.firstAttempt > windowMs) {
+    localStorage.setItem('otp-rate-limit', JSON.stringify({ count: 1, firstAttempt: now }))
+  } else {
+    localStorage.setItem('otp-rate-limit', JSON.stringify({ count: data.count + 1, firstAttempt: data.firstAttempt }))
+  }
+}
+
+function isRateLimited(): boolean {
+  const { count, firstAttempt } = getRateLimitData()
+  return count >= 3 && Date.now() - firstAttempt < 60_000
+}
+
+function getRateLimitSecondsLeft(): number {
+  const { firstAttempt } = getRateLimitData()
+  return Math.ceil((60_000 - (Date.now() - firstAttempt)) / 1000)
+}
+
+// ─── Phone validation ─────────────────────────────────────────────────────────
+
+function validatePhone(phone: string): FieldError {
+  const digits = phone.replace(/\D/g, '')
+  if (!digits) return 'Phone number is required. / 電話番号を入力してください。'
+  if (digits.length < 7) return 'Phone number is too short. / 電話番号が短すぎます。'
+  if (digits.length > 15) return 'Phone number is too long. / 電話番号が長すぎます。'
+  return null
+}
+
+// ─── OTP Input ────────────────────────────────────────────────────────────────
+
+function OtpInput({ value, onChange, hasError }: { value: string; onChange: (v: string) => void; hasError: boolean }) {
+  const inputs = useRef<(HTMLInputElement | null)[]>([])
+  const digits = Array.from({ length: 6 }, (_, i) => value[i] ?? '')
 
   function handleChange(idx: number, char: string) {
-    if (!/^\d?$/.test(char)) return;
-    const next = digits
-      .map((d, i) => (i === idx ? char || " " : d))
-      .join("")
-      .trimEnd();
-    onChange(next);
-    if (char && idx < 5) inputs.current[idx + 1]?.focus();
+    if (!/^\d?$/.test(char)) return
+    const next = digits.map((d, i) => i === idx ? char : d).join('')
+    onChange(next)
+    if (char && idx < 5) inputs.current[idx + 1]?.focus()
   }
 
   function handleKeyDown(idx: number, e: React.KeyboardEvent) {
-    if (e.key === "Backspace" && !digits[idx].trim() && idx > 0) {
-      inputs.current[idx - 1]?.focus();
+    if (e.key === 'Backspace') {
+      if (!digits[idx] && idx > 0) {
+        const next = digits.map((d, i) => i === idx - 1 ? '' : d).join('')
+        onChange(next)
+        inputs.current[idx - 1]?.focus()
+      }
     }
   }
 
   function handlePaste(e: React.ClipboardEvent) {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    onChange(pasted);
-    inputs.current[Math.min(pasted.length, 5)]?.focus();
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    onChange(pasted)
+    inputs.current[Math.min(pasted.length, 5)]?.focus()
   }
 
+  const baseCell = "w-11 h-14 text-center text-xl font-bold rounded-xl border-2 bg-zinc-800 text-white transition-all focus:outline-none"
+  const normalCell = "border-zinc-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+  const errorCell = "border-red-500 bg-red-500/5"
+
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+    <div className={`flex gap-2 justify-center ${hasError ? 'animate-shake' : ''}`} onPaste={handlePaste}>
       {digits.map((digit, idx) => (
         <input
           key={idx}
-          ref={(el) => { inputs.current[idx] = el; }}
+          ref={el => { inputs.current[idx] = el }}
           type="text"
           inputMode="numeric"
           maxLength={1}
-          value={digit.trim()}
-          onChange={(e) => handleChange(idx, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(idx, e)}
-          className="w-11 h-14 text-center text-xl font-bold border-2 rounded-xl border-stone-300 focus:border-red-600 focus:outline-none transition-colors bg-white text-stone-900"
+          value={digit}
+          onChange={e => handleChange(idx, e.target.value)}
+          onKeyDown={e => handleKeyDown(idx, e)}
+          className={`${baseCell} ${hasError ? errorCell : normalCell}`}
         />
       ))}
     </div>
-  );
+  )
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ─── Spinner ──────────────────────────────────────────────────────────────────
 
-type Step = "phone" | "otp";
+function Spinner() {
+  return (
+    <svg className="animate-spin-slow w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+    </svg>
+  )
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>("phone");
-  const [phone, setPhone] = useState("");
-  const [countryCode, setCountryCode] = useState("+81");
-  const [otp, setOtp] = useState("");
-  const [email, setEmail] = useState("");
-  const [showEmail, setShowEmail] = useState(false);
-  const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const router = useRouter()
+  const [step, setStep] = useState<Step>('phone')
+  const [mounted, setMounted] = useState(false)
+  const [countryCode, setCountryCode] = useState('+81')
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [email, setEmail] = useState('')
+  const [showEmail, setShowEmail] = useState(false)
+  const [phoneError, setPhoneError] = useState<FieldError>(null)
+  const [otpError, setOtpError] = useState<FieldError>(null)
+  const [rateLimited, setRateLimited] = useState(false)
+  const [rateLimitSeconds, setRateLimitSeconds] = useState(0)
+  const [resendSeconds, setResendSeconds] = useState(60)
+  const [phoneShake, setPhoneShake] = useState(false)
+  const [otpShake, setOtpShake] = useState(false)
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Rate limit countdown
+  useEffect(() => {
+    if (!rateLimited) return
+    const id = setInterval(() => {
+      const s = getRateLimitSecondsLeft()
+      setRateLimitSeconds(s)
+      if (s <= 0) { setRateLimited(false); clearInterval(id) }
+    }, 1000)
+    return () => clearInterval(id)
+  }, [rateLimited])
+
+  // OTP resend countdown
+  useEffect(() => {
+    if (step !== 'otp') return
+    setResendSeconds(60)
+    const id = setInterval(() => setResendSeconds(s => s <= 1 ? (clearInterval(id), 0) : s - 1), 1000)
+    return () => clearInterval(id)
+  }, [step])
 
   function handleSendOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    if (phone.replace(/\D/g, "").length < 7) {
-      setError("Please enter a valid phone number.");
-      return;
+    e.preventDefault()
+    const err = validatePhone(phone)
+    if (err) {
+      setPhoneError(err)
+      setPhoneShake(true)
+      setTimeout(() => setPhoneShake(false), 500)
+      return
     }
-    // TODO: call API to send OTP
-    startTransition(() => {
-      setStep("otp");
-    });
+    if (isRateLimited()) {
+      setRateLimited(true)
+      setRateLimitSeconds(getRateLimitSecondsLeft())
+      return
+    }
+    incrementRateLimit()
+    // TODO: call API
+    startTransition(() => { setStep('otp') })
   }
 
   function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    if (otp.trim().length < 6) {
-      setError("Please enter the 6-digit code.");
-      return;
+    e.preventDefault()
+    if (otp.length < 6) {
+      setOtpError('Please enter the full 6-digit code. / 6桁のコードを入力してください。')
+      setOtpShake(true)
+      setTimeout(() => setOtpShake(false), 500)
+      return
     }
-    // TODO: verify OTP via API
-    startTransition(() => {
-      router.push("/");
-    });
+    // TODO: verify via API; for now simulate success
+    startTransition(() => { router.push('/onboarding') })
   }
 
   function handleResend() {
-    setOtp("");
-    setError("");
+    if (resendSeconds > 0) return
+    setOtp('')
+    setOtpError(null)
+    setResendSeconds(60)
     // TODO: re-trigger OTP send
   }
 
+  // Shared input class helpers
+  const inputBase = "w-full px-4 py-3.5 rounded-xl border-2 bg-zinc-800 text-white placeholder:text-zinc-500 focus:outline-none transition-all text-sm"
+  const inputNormal = "border-zinc-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+  const inputError = "border-red-500 bg-red-500/5"
+
+  // suppress unused warning for otpShake (used for future animation hook)
+  void otpShake
+
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50">
+    <div className="min-h-screen flex flex-col bg-zinc-950">
       {/* Top bar */}
-      <div className="px-6 py-5 flex items-center justify-between">
+      <div className="px-6 py-5 flex items-center justify-between border-b border-white/5">
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="text-red-700 text-2xl font-bold leading-none">店</span>
+          <span className="text-red-600 text-2xl font-black leading-none">店</span>
           <span className="flex flex-col leading-tight">
-            <span className="text-sm font-bold tracking-widest text-stone-900 uppercase">
-              machi-mise
-            </span>
-            <span className="text-[10px] text-stone-400 tracking-wider">
-              まちの店
-            </span>
+            <span className="text-sm font-bold tracking-widest text-white uppercase">machi-mise</span>
+            <span className="text-[10px] text-zinc-500 tracking-wider">まちの店</span>
           </span>
         </Link>
-        <Link
-          href="/"
-          className="text-sm text-stone-500 hover:text-red-700 transition-colors"
-        >
-          ← Back to browse
-        </Link>
+        <Link href="/" className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</Link>
       </div>
 
       {/* Card */}
       <div className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-sm bg-white rounded-3xl border border-stone-200 shadow-sm p-8">
+        <div className={`w-full max-w-sm bg-zinc-900 border border-white/5 rounded-3xl shadow-2xl p-8 ${mounted ? 'animate-fade-in-up' : 'opacity-0'}`}>
+
           {/* Decorative kanji */}
-          <div className="text-center mb-6">
-            <span className="text-5xl font-black text-red-100 select-none leading-none block">
-              入
-            </span>
-            <h1 className="text-2xl font-extrabold text-stone-900 mt-1">
-              {step === "phone" ? "Welcome back" : "Verify your number"}
-            </h1>
-            <p className="text-sm text-stone-500 mt-1.5">
-              {step === "phone" ? (
-                <>
-                  Sign in with your phone number
-                  <br />
-                  <span className="text-stone-400 text-xs">
-                    電話番号でサインイン
-                  </span>
-                </>
-              ) : (
-                <>
-                  Enter the 6-digit code sent to
-                  <br />
-                  <span className="font-semibold text-stone-700">
-                    {countryCode} {phone}
-                  </span>
-                </>
-              )}
-            </p>
+          <div className="text-center mb-6 relative">
+            <span className="text-8xl font-black text-white/[0.04] select-none absolute -top-2 left-1/2 -translate-x-1/2 leading-none">入</span>
+            <div className="relative">
+              <h1 className="text-2xl font-extrabold text-white">
+                {step === 'phone' ? 'Welcome back' : 'Enter your code'}
+              </h1>
+              <p className="text-sm text-zinc-500 mt-1.5">
+                {step === 'phone' ? (
+                  <>Sign in with your phone number<br/><span className="text-zinc-600 text-xs">電話番号でサインイン</span></>
+                ) : (
+                  <>6-digit code sent to <strong className="text-white">{countryCode} {phone}</strong></>
+                )}
+              </p>
+            </div>
           </div>
 
-          {/* ── Step: Phone ── */}
-          {step === "phone" && (
-            <form onSubmit={handleSendOtp} className="space-y-5">
+          {/* STEP: phone */}
+          {step === 'phone' && (
+            <form onSubmit={handleSendOtp} className="space-y-4" noValidate>
               <div>
-                <label className="block text-xs font-semibold text-stone-600 mb-1.5 tracking-wide uppercase">
+                <label className="block text-xs font-semibold text-zinc-400 mb-2 tracking-wide uppercase">
                   Phone number 電話番号
                 </label>
-                <div className="flex gap-2">
+                <div className={`flex gap-2 ${phoneShake ? 'animate-shake' : ''}`}>
                   <select
                     value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    className="shrink-0 w-24 px-2 py-3 rounded-xl border-2 border-stone-200 focus:border-red-500 focus:outline-none text-sm bg-white text-stone-700"
+                    onChange={e => { setCountryCode(e.target.value); setPhoneError(null) }}
+                    className="shrink-0 w-24 px-2 py-3.5 rounded-xl border-2 border-zinc-700 bg-zinc-800 text-white text-sm focus:outline-none focus:border-red-500"
                   >
                     <option value="+81">🇯🇵 +81</option>
                     <option value="+1">🇺🇸 +1</option>
@@ -186,21 +261,22 @@ export default function LoginPage() {
                     type="tel"
                     placeholder="090-0000-0000"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-red-500 focus:outline-none text-sm transition-colors"
+                    onChange={e => { setPhone(e.target.value); setPhoneError(null) }}
+                    className={`${inputBase} ${phoneError ? inputError : inputNormal}`}
                     autoFocus
                   />
                 </div>
+                {phoneError && <p className="text-xs text-red-400 mt-2">{phoneError}</p>}
               </div>
 
               {/* Optional email */}
               <div>
                 <button
                   type="button"
-                  className="text-xs text-stone-400 hover:text-red-600 transition-colors underline-offset-2 hover:underline"
-                  onClick={() => setShowEmail((v) => !v)}
+                  className="text-xs text-zinc-500 hover:text-red-400 transition-colors underline-offset-2 hover:underline"
+                  onClick={() => setShowEmail(v => !v)}
                 >
-                  {showEmail ? "Hide email (optional)" : "+ Add email (optional)"}
+                  {showEmail ? '− Hide email' : '+ Add email (optional)'}
                 </button>
                 {showEmail && (
                   <div className="mt-2">
@@ -208,71 +284,67 @@ export default function LoginPage() {
                       type="email"
                       placeholder="you@example.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-red-500 focus:outline-none text-sm transition-colors"
+                      onChange={e => setEmail(e.target.value)}
+                      className={`${inputBase} ${inputNormal}`}
                     />
                   </div>
                 )}
               </div>
 
-              {error && (
-                <p className="text-xs text-red-600 font-medium">{error}</p>
+              {rateLimited && (
+                <div className="p-3 rounded-xl bg-red-900/20 border border-red-800/50">
+                  <p className="text-xs text-red-400 font-medium">Too many attempts. Try again in {rateLimitSeconds}s.</p>
+                </div>
               )}
 
               <button
                 type="submit"
-                disabled={isPending}
-                className="w-full py-3.5 rounded-xl bg-red-700 text-white font-bold hover:bg-red-800 disabled:opacity-60 transition-colors text-sm"
+                disabled={isPending || rateLimited}
+                className="w-full py-3.5 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm flex items-center justify-center gap-2"
               >
-                {isPending ? "Sending…" : "Send OTP コードを送る"}
+                {isPending ? <><Spinner /> Sending…</> : 'Send OTP コードを送る'}
               </button>
 
-              <p className="text-center text-xs text-stone-400 leading-relaxed">
-                By continuing you agree to our{" "}
-                <a href="#" className="underline hover:text-red-600">
-                  Terms
-                </a>{" "}
-                and{" "}
-                <a href="#" className="underline hover:text-red-600">
-                  Privacy Policy
-                </a>
-                .
+              <p className="text-center text-xs text-zinc-600 leading-relaxed">
+                By continuing you agree to our{' '}
+                <Link href="/terms" className="text-zinc-500 hover:text-red-400 underline underline-offset-2">Terms</Link>
+                {' '}and{' '}
+                <Link href="/privacy" className="text-zinc-500 hover:text-red-400 underline underline-offset-2">Privacy Policy</Link>.
               </p>
             </form>
           )}
 
-          {/* ── Step: OTP ── */}
-          {step === "otp" && (
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
-              <OtpInput value={otp} onChange={setOtp} />
+          {/* STEP: otp */}
+          {step === 'otp' && (
+            <form onSubmit={handleVerifyOtp} className="space-y-5" noValidate>
+              <OtpInput value={otp} onChange={v => { setOtp(v); setOtpError(null) }} hasError={!!otpError} />
 
-              {error && (
-                <p className="text-xs text-red-600 font-medium text-center">
-                  {error}
-                </p>
+              {otpError && (
+                <p className="text-xs text-red-400 font-medium text-center">{otpError}</p>
               )}
 
               <button
                 type="submit"
-                disabled={isPending || otp.trim().length < 6}
-                className="w-full py-3.5 rounded-xl bg-red-700 text-white font-bold hover:bg-red-800 disabled:opacity-60 transition-colors text-sm"
+                disabled={isPending || otp.length < 6}
+                className="w-full py-3.5 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm flex items-center justify-center gap-2"
               >
-                {isPending ? "Verifying…" : "Verify & Sign in 確認"}
+                {isPending ? <><Spinner /> Verifying…</> : 'Verify & Sign in 確認'}
               </button>
 
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-2.5">
                 <button
                   type="button"
                   onClick={handleResend}
-                  className="text-xs text-stone-500 hover:text-red-600 transition-colors underline-offset-2 hover:underline"
+                  disabled={resendSeconds > 0}
+                  className="text-xs text-zinc-500 hover:text-red-400 disabled:cursor-default disabled:hover:text-zinc-500 transition-colors"
                 >
-                  Didn't receive a code? Resend 再送信
+                  {resendSeconds > 0 ? `Resend in ${resendSeconds}s` : 'Resend OTP 再送信'}
                 </button>
-                <br />
+                <br/>
                 <button
                   type="button"
-                  onClick={() => { setStep("phone"); setOtp(""); setError(""); }}
-                  className="text-xs text-stone-400 hover:text-red-600 transition-colors"
+                  onClick={() => { setStep('phone'); setOtp(''); setOtpError(null) }}
+                  className="text-xs text-zinc-500 hover:text-white transition-colors"
                 >
                   ← Change phone number
                 </button>
@@ -282,14 +354,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Footer note */}
-      <p className="text-center text-xs text-stone-400 pb-6">
-        New here?{" "}
-        <Link href="/login" className="text-red-700 hover:underline font-medium">
+      <p className="text-center text-xs text-zinc-600 pb-6">
+        New here?{' '}
+        <Link href="/login" className="text-red-500 hover:text-red-400 font-medium">
           Signing in creates your account automatically.
         </Link>
       </p>
     </div>
-  );
+  )
 }
-

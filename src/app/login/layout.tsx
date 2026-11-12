@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-export default function LoginLayout({ children }: LayoutProps<'/login'>) {
+export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
