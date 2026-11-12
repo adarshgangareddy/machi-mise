@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Noto_Sans_JP } from "next/font/google";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const geist = Geist({
@@ -59,7 +60,7 @@ export default function RootLayout({
       className={`${geist.variable} ${notoJp.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-50">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

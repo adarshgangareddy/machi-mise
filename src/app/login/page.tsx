@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState, useEffect, useTransition } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 
 type Step = 'phone' | 'otp'
 type FieldError = string | null
@@ -116,6 +118,8 @@ function Spinner() {
 
 export default function LoginPage() {
   const router = useRouter()
+  const { user, isAuthenticated, login, logout } = useAuth()
+  const { lang, t } = useLanguage()
   const [step, setStep] = useState<Step>('phone')
   const [mounted, setMounted] = useState(false)
   const [countryCode, setCountryCode] = useState('+81')
@@ -180,8 +184,11 @@ export default function LoginPage() {
       setTimeout(() => setOtpShake(false), 500)
       return
     }
-    // TODO: verify via API; for now simulate success
-    startTransition(() => { router.push('/onboarding') })
+    // Perform authentication
+    login(`${countryCode} ${phone}`, email)
+    startTransition(() => {
+      router.push('/')
+    })
   }
 
   function handleResend() {
@@ -218,25 +225,57 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-10">
         <div className={`w-full max-w-sm bg-zinc-900 border border-white/5 rounded-3xl shadow-2xl p-8 ${mounted ? 'animate-fade-in-up' : 'opacity-0'}`}>
 
-          {/* Decorative kanji */}
-          <div className="text-center mb-6 relative">
-            <span className="text-8xl font-black text-white/[0.04] select-none absolute -top-2 left-1/2 -translate-x-1/2 leading-none">入</span>
-            <div className="relative">
-              <h1 className="text-2xl font-extrabold text-white">
-                {step === 'phone' ? 'Welcome back' : 'Enter your code'}
-              </h1>
-              <p className="text-sm text-zinc-500 mt-1.5">
-                {step === 'phone' ? (
-                  <>Sign in with your phone number<br/><span className="text-zinc-600 text-xs">電話番号でサインイン</span></>
-                ) : (
-                  <>6-digit code sent to <strong className="text-white">{countryCode} {phone}</strong></>
-                )}
-              </p>
+          {/* Already Logged In State */}
+          {isAuthenticated && user ? (
+            <div className="space-y-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-red-600/20 border border-red-500/40 mx-auto flex items-center justify-center text-3xl">
+                👤
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">{user.name}</h2>
+                <p className="text-xs text-zinc-400 mt-1">{user.phone}</p>
+                {user.email && <p className="text-xs text-zinc-500">{user.email}</p>}
+                <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+                  ● Signed in
+                </span>
+              </div>
+              <div className="space-y-2">
+                <Link
+                  href="/"
+                  className="block w-full py-3.5 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 transition-colors text-sm glow-red"
+                >
+                  Go to Directory →
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  className="block w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs border border-white/5 transition-colors"
+                >
+                  Log out of this device
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Decorative kanji */}
+              <div className="text-center mb-6 relative">
+                <span className="text-8xl font-black text-white/[0.04] select-none absolute -top-2 left-1/2 -translate-x-1/2 leading-none">入</span>
+                <div className="relative">
+                  <h1 className="text-2xl font-extrabold text-white">
+                    {step === 'phone' ? 'Welcome back' : 'Enter your code'}
+                  </h1>
+                  <p className="text-sm text-zinc-500 mt-1.5">
+                    {step === 'phone' ? (
+                      <>Sign in with your phone number<br/><span className="text-zinc-600 text-xs">電話番号でサインイン</span></>
+                    ) : (
+                      <>6-digit code sent to <strong className="text-white">{countryCode} {phone}</strong></>
+                    )}
+                  </p>
+                </div>
+              </div>
 
-          {/* STEP: phone */}
-          {step === 'phone' && (
+              {/* STEP: phone */}
+              {step === 'phone' && (
             <form onSubmit={handleSendOtp} className="space-y-4" noValidate>
               <div>
                 <label className="block text-xs font-semibold text-zinc-400 mb-2 tracking-wide uppercase">
@@ -350,6 +389,8 @@ export default function LoginPage() {
                 </button>
               </div>
             </form>
+          )}
+          </>
           )}
         </div>
       </div>
