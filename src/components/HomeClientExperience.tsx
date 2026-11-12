@@ -12,6 +12,7 @@ import CookieBanner from "@/components/CookieBanner";
 import MobileNav from "@/components/MobileNav";
 import FoodFilterModal from "@/components/FoodFilterModal";
 import RequireLoginModal from "@/components/RequireLoginModal";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useFilter, PREFECTURES } from "@/context/FilterContext";
 import { CATEGORIES } from "@/data/restaurants";
 import { useLanguage } from "@/context/LanguageContext";
@@ -108,6 +109,9 @@ export default function HomeClientExperience() {
 
       {/* 5. Mobile Bottom Navigation Bar (Home, Explore, Cuisines, My List, Account) */}
       <MobileNav />
+
+      {/* Floating Theme Switcher on Desktop */}
+      <ThemeSwitcher variant="floating" />
 
       {/* 6. Modals */}
       <FoodFilterModal />

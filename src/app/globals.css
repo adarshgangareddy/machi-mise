@@ -191,3 +191,104 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* ── Light Mode Theme ─────────────────────────────────────────────── */
+
+html.light,
+body.light,
+[data-theme="light"] {
+  --background: #fbfaf7;
+  --foreground: #18181b;
+  --accent: #dc2626;
+  --accent-hover: #b91c1c;
+  --card: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --muted: #52525b;
+}
+
+html.light body {
+  background-color: #fbfaf7 !important;
+  color: #18181b !important;
+}
+
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05) !important;
+  color: #18181b !important;
+}
+
+html.light .bg-zinc-950 {
+  background-color: #fbfaf7 !important;
+  color: #18181b !important;
+}
+
+html.light .bg-zinc-900,
+html.light .bg-zinc-900\/90,
+html.light .bg-zinc-900\/80,
+html.light .bg-zinc-900\/60,
+html.light .bg-zinc-900\/40 {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .bg-zinc-950\/90,
+html.light .bg-zinc-950\/85,
+html.light .bg-zinc-950\/80,
+html.light .bg-zinc-950\/70,
+html.light .bg-zinc-950\/60 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .bg-zinc-800,
+html.light .bg-zinc-800\/80,
+html.light .bg-zinc-800\/90 {
+  background-color: #f4f3ef !important;
+  color: #18181b !important;
+}
+
+html.light .text-white {
+  color: #18181b !important;
+}
+
+html.light .text-zinc-100 {
+  color: #18181b !important;
+}
+
+html.light .text-zinc-200 {
+  color: #27272a !important;
+}
+
+html.light .text-zinc-300 {
+  color: #3f3f46 !important;
+}
+
+html.light .text-zinc-400 {
+  color: #52525b !important;
+}
+
+html.light .text-zinc-500 {
+  color: #71717a !important;
+}
+
+html.light .border-white\/10,
+html.light .border-white\/5,
+html.light .border-white\/15,
+html.light .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .text-white\/\[0\.025\] {
+  color: rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+

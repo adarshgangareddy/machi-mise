@@ -80,7 +80,7 @@ export const CUISINES_WITH_IMAGES = [
   { id: "soba-udon", label: "Soba", ja: "蕎麦", image: "https://images.unsplash.com/photo-1618841557871-b4664fbf0cb3?q=80&w=360&auto=format&fit=crop" },
   { id: "soba-udon", label: "Udon", ja: "うどん", image: "https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=360&auto=format&fit=crop" },
   { id: "yakitori", label: "Yakitori", ja: "焼き鳥", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=360&auto=format&fit=crop" },
-  { id: "okonomiyaki", label: "Okonomiyaki", ja: "お好み焼き", image: "https://images.unsplash.com/photo-1583032015879-c5c2d3080e79?q=80&w=360&auto=format&fit=crop" },
+  { id: "okonomiyaki", label: "Okonomiyaki", ja: "お好み焼き", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=360&auto=format&fit=crop" },
 ];
 
 export const POPULAR_AREAS = [

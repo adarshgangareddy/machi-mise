@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useFilter, PREFECTURES } from "@/context/FilterContext";
@@ -114,8 +115,9 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        {/* Right Section: Language Switcher + Bookmarks + Auth */}
+        {/* Right Section: Language Switcher + Theme Switcher + Bookmarks + Auth */}
         <div className="hidden sm:flex items-center gap-2.5">
+          <ThemeSwitcher variant="pill" />
           <LanguageSwitcher />
 
           {/* Bookmarks Counter */}
@@ -189,8 +191,9 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Language Switcher */}
+        {/* Mobile Language Switcher & Theme Switcher */}
         <div className="flex sm:hidden items-center gap-1.5">
+          <ThemeSwitcher variant="icon" />
           <LanguageSwitcher />
         </div>
       </div>

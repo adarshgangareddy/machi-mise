@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState, useEffect, useTransition } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useLanguage } from '@/context/LanguageContext'
+import Navbar from '@/components/Navbar'
+import MobileNav from '@/components/MobileNav'
+import Footer from '@/components/Footer'
 
 type Step = 'phone' | 'otp'
 type FieldError = string | null
@@ -208,18 +211,9 @@ export default function LoginPage() {
   void otpShake
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950">
-      {/* Top bar */}
-      <div className="px-6 py-5 flex items-center justify-between border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2 group">
-          <span className="text-red-600 text-2xl font-black leading-none">店</span>
-          <span className="flex flex-col leading-tight">
-            <span className="text-sm font-bold tracking-widest text-white uppercase">machi-mise</span>
-            <span className="text-[10px] text-zinc-500 tracking-wider">まちの店</span>
-          </span>
-        </Link>
-        <Link href="/" className="text-sm text-zinc-500 hover:text-white transition-colors">← Back</Link>
-      </div>
+    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 pb-16 sm:pb-0">
+      {/* Global Navbar with Language & Theme Switchers */}
+      <Navbar />
 
       {/* Card */}
       <div className="flex-1 flex items-center justify-center px-4 py-10">
@@ -435,6 +429,10 @@ export default function LoginPage() {
           Signing in creates your account automatically.
         </Link>
       </p>
+
+      {/* Global Footer & Mobile Nav */}
+      <Footer />
+      <MobileNav />
     </div>
   )
 }
