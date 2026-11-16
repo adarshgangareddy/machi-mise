@@ -13,12 +13,15 @@ import MobileNav from "@/components/MobileNav";
 import FoodFilterModal from "@/components/FoodFilterModal";
 import RequireLoginModal from "@/components/RequireLoginModal";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import MemberDashboardHeader from "@/components/MemberDashboardHeader";
 import { useFilter, PREFECTURES } from "@/context/FilterContext";
 import { CATEGORIES } from "@/data/restaurants";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HomeClientExperience() {
   const { lang } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const { selectedFoodType, setSelectedFoodType, selectedKen } = useFilter();
 
   const isFoodOpened = selectedFoodType !== "all";
@@ -81,10 +84,32 @@ export default function HomeClientExperience() {
           {/* Directory Section with Split View & Live Map (Image 2) */}
           <DirectorySection />
         </div>
+      ) : isAuthenticated ? (
+        /* ══════════════════════════════════════════════════════════════════════
+           LOGGED IN MEMBER DASHBOARD VIEW:
+           HeroSection and Business CTA are completely REMOVED when logged in!
+           Shows personalized MemberDashboardHeader and jumps straight to food/directory.
+           ══════════════════════════════════════════════════════════════════════ */
+        <div className="flex-1 w-full animate-fade-in-up">
+          {/* Personalized Member Header (Replaces HeroSection) */}
+          <MemberDashboardHeader />
+
+          {/* Browse by Cuisine & Popular Areas */}
+          <CategoriesSection />
+
+          {/* Main Directory & Live Map */}
+          <DirectorySection />
+
+          {/* Community Share & Available Everywhere Badges */}
+          <CommunityShareAndPlatforms />
+        </div>
       ) : (
-        /* STANDARD HOMEPAGE VIEW (When no specific cuisine is opened) */
+        /* ══════════════════════════════════════════════════════════════════════
+           GUEST / LOGGED-OUT PUBLIC HOMEPAGE VIEW:
+           Shows public HeroSection & Registration CTA
+           ══════════════════════════════════════════════════════════════════════ */
         <div className="flex-1 w-full">
-          {/* Hero Section */}
+          {/* Hero Section (Public only) */}
           <HeroSection />
 
           {/* Browse by Cuisine & Popular Areas (Image 1) */}

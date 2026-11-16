@@ -158,6 +158,14 @@ export default function Navbar() {
                     </span>
                   </div>
                   <div className="py-1">
+                    <Link
+                      href="/"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors flex items-center justify-between"
+                    >
+                      <span>{lang === "ja" ? "マイダッシュボード" : "Member Dashboard"}</span>
+                      <span>📊</span>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => {
